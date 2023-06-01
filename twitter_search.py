@@ -1,6 +1,6 @@
 from segment_keyword import extract_keywords
 import snscrape.modules.twitter as sntwitter
-import json
+from sentiment_detect import detect_sentiment
 import re
 class TwitterStreamer:
     # def __init__(self, bootstrap_servers, topic_name):
@@ -62,6 +62,8 @@ class TwitterStreamer:
             feature_keywords = []
             if tweet.lang != 'vi':
                 feature_keywords = extract_keywords(pre_process(tweet.rawContent))
+
+
             is_reply = False
             if tweet.inReplyToUser:
                 is_reply = True
@@ -115,10 +117,12 @@ class TwitterStreamer:
                 'cashtags': tweet.cashtags,
                 'links': link_dicts,
                 'media': url,
-                'report_ids': report_ids
+                'report_ids': report_ids,
+                "sentiment": detect_sentiment(tweet.rawContent)
         
             }
 
             tweets_list.append(tweet_dict)
 
         return tweets_list
+    
