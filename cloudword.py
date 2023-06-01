@@ -4,6 +4,8 @@ from json import loads
 import re
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
+
+
 class KafkaTwitterAnalyzer:
     def __init__(self, topic_name: str, consumer: str, number_tweets: int):
         self.consumer = KafkaConsumer(

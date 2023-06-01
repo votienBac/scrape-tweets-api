@@ -1,5 +1,7 @@
-
+from segment_keyword import extract_keywords
 import snscrape.modules.twitter as sntwitter
+import json
+import re
 class TwitterStreamer:
     # def __init__(self, bootstrap_servers, topic_name):
     #     self.bootstrap_servers = bootstrap_servers
@@ -11,7 +13,23 @@ class TwitterStreamer:
     def stream_tweets(self, keyword, total_tweets, report_id):
         def textlink_to_dict(textlink):
             return textlink.url
-
+        def pre_process(text):
+            text = re.sub('http://\S+|https://\S+', '', text)
+            text = re.sub('http[s]?://\S+', '', text)
+            text = re.sub(r"http\S+", "", text)
+            text = re.sub('&amp', 'and', text)
+            text = re.sub('&lt', '<', text)
+            text = re.sub('&gt', '>', text)
+            text = re.sub('[\r\n]+', ' ', text)
+            text = re.sub(r'@\w+', '', text)
+            text = re.sub(r'#\w+', '', text)
+            text = re.sub('\s+', ' ', text)
+            text = re.sub(r'[^\x00-\x7F]+', '', text)
+            text = re.sub(r'\d{1,3}(,\d{3})*', '', text)
+            text = re.sub(r'#[^\s]+', '', text)  # Xóa hashtag
+            text = re.sub(r'\$\w+', '', text)
+            text = text.lower()
+            return text
         tweets_list = []
 
         for i, tweet in enumerate(sntwitter.TwitterSearchScraper(keyword, mode=sntwitter.TwitterSearchScraperMode.TOP).get_items()):
@@ -41,11 +59,13 @@ class TwitterStreamer:
                         'username': user1.username,
                         'id': user1.id
                     })
-
+            feature_keywords = []
+            if tweet.lang != 'vi':
+                feature_keywords = extract_keywords(pre_process(tweet.rawContent))
             is_reply = False
             if tweet.inReplyToUser:
                 is_reply = True
-
+            
             url = []
             if tweet.media:
                 for media in tweet.media:
@@ -73,6 +93,7 @@ class TwitterStreamer:
                 'id': str(tweet.id),
                 'conversation_id': str(tweet.conversationId),
                 'content': tweet.rawContent,
+                'feature_keywords': feature_keywords,
                 'date': tweet.date.strftime('%Y-%m-%d %H:%M:%S'),
                 'username': user.username,
                 'user_id': str(user.id),
@@ -101,4 +122,3 @@ class TwitterStreamer:
             tweets_list.append(tweet_dict)
 
         return tweets_list
-

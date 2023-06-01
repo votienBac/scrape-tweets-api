@@ -4,6 +4,8 @@ from cloudword import KafkaTwitterAnalyzer
 from twitter_search import TwitterStreamer
 from profile_search import ProfileSearch
 import json
+import random
+import string
 
 
 app = Flask(__name__)
@@ -22,6 +24,19 @@ def getTweetsReport():
 
     streamer = TwitterStreamer()
     tweets = streamer.stream_tweets(query, size, report_id)
+
+    sendTweetsToTopic(producer=producer, tweets= tweets, topic_name=topic_name)
+    response = jsonify({'tweets_count': len(tweets)})  # Create a JSON response
+    return response
+@app.route('/projects/get-tweets', methods=['POST'])
+def getTweetsForProject():
+    data = request.get_json()
+    query = data.get('query')
+    size = data.get('size')
+    topic_name = 'project-tweets'
+
+    streamer = TwitterStreamer()
+    tweets = streamer.stream_tweets(query, size, None)
 
     sendTweetsToTopic(producer=producer, tweets= tweets, topic_name=topic_name)
     response = jsonify({'tweets_count': len(tweets)})  # Create a JSON response
@@ -49,13 +64,16 @@ def getCloudwordReport():
     size = data.get('size')
     number_tweets = data.get('number_tweets')
     topic_name = 'topic-report-'+str(report_id)
-    consumer = topic_name + '-consumer'
+    consumer = topic_name + '-consumer' + generate_random_string(5)
     analyzer = KafkaTwitterAnalyzer(topic_name, consumer, number_tweets)
     cloudwords = analyzer.process_tweets(size)
     # Convert int64 elements to regular integers
     cloudwords = [{'text': word['text'], 'count': int(word['count'])} for word in cloudwords]
     response = jsonify({'cloudwords': cloudwords})  # Create a JSON response
     return response
-
+def generate_random_string(length):
+    characters = string.ascii_letters + string.digits + string.punctuation
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
 if __name__ == '__main__':
-    app.run()
+    app.run(app.run(host='0.0.0.0', port=5000))
