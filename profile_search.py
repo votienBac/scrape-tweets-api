@@ -23,4 +23,6 @@ class ProfileSearch:
             'profile_banner_url': user.profileBannerUrl,
             'created_date': user.created.strftime('%Y-%m-%d %H:%M:%S')
         }
-        return user_dict                                                                                                                                                                                                           
+        return user_dict  
+        
+                                                                                                                                                                                                                 

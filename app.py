@@ -3,6 +3,7 @@ from kafka import KafkaProducer
 from cloudword import KafkaTwitterAnalyzer
 from twitter_search import TwitterStreamer
 from profile_search import ProfileSearch
+from Scweet.follower import ScweetScraper
 import json
 import random
 import string
@@ -71,6 +72,21 @@ def getCloudwordReport():
     cloudwords = [{'text': word['text'], 'count': int(word['count'])} for word in cloudwords]
     response = jsonify({'cloudwords': cloudwords})  # Create a JSON response
     return response
+@app.route('/scrape_following', methods=['POST'])
+def scrape_following_route():
+    data = request.json  # Get the JSON data from the request body
+    
+    if not data or 'users' not in data:
+        return jsonify({'error': 'No users data provided'})
+
+    users = data['users']
+    if not isinstance(users, dict):
+        return jsonify({'error': 'Invalid users data format'})
+
+    scraper = ScweetScraper()
+    following = scraper.scrape_following(users=users, verbose=0, headless=False, wait=2)
+
+    return jsonify(following)
 def generate_random_string(length):
     characters = string.ascii_letters + string.digits + string.punctuation
     random_string = ''.join(random.choice(characters) for _ in range(length))
