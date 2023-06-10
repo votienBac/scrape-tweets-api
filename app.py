@@ -84,7 +84,7 @@ def scrape_following_route():
         return jsonify({'error': 'Invalid users data format'})
 
     scraper = ScweetScraper()
-    following = scraper.scrape_following(users=users, verbose=0, headless=False, wait=2)
+    following = scraper.scrape_following(users=users, verbose=0, headless=True, wait=2)
 
     return jsonify(following)
 def generate_random_string(length):
