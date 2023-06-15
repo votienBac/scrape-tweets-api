@@ -13,6 +13,12 @@ import datetime
 import pandas as pd
 import platform
 from selenium.webdriver.common.keys import Keys
+import logging
+
+# Configure the logging
+logging.basicConfig(level=logging.INFO)
+
+
 # import pathlib
 
 from selenium.webdriver.support.wait import WebDriverWait
@@ -392,7 +398,8 @@ def get_users_follow(users, username, password, email, headless, follow=None, ve
             sleep(wait)
             log_in(driver, username, password)
             sleep(wait)
-        print("Crawling " + user + " " + follow)
+        # print("Crawling " + user + " " + follow)
+        logging.info("Crawling " + user + " " + follow)
         driver.get('https://twitter.com/' + user + '/' + follow)
         sleep(random.uniform(wait - 0.5, wait + 0.5))
         # check if we must keep scrolling
@@ -422,7 +429,9 @@ def get_users_follow(users, username, password, email, headless, follow=None, ve
                     break
                 if verbose:
                     print(follow_elem)
-            print("Found " + str(len(follows_elem)) + " " + follow)
+            # print("Found " + str(len(follows_elem)) + " " + follow)
+            # Log messages using different log levels
+            logging.info("Found " + str(len(follows_elem)) + " " + follow)
             scroll_attempt = 0
             while not is_limit:
                 sleep(random.uniform(wait - 0.5, wait + 0.5))

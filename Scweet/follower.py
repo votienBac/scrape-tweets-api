@@ -2,9 +2,10 @@ from Scweet.Scweet.user import get_users_following
 import json
 import random
 
-file_credentials_path = ".\Scweet\credentials.txt"
+# file_credentials_path = ".\Scweet\credentials.txt"
+file_credentials_path = "/app/credentials.txt"
 class ScweetScraper:
-    def __init__(self, env_path="/app/credentials.txt"):
+    def __init__(self, env_path=file_credentials_path):
         self.env_path = env_path
     def scrape_following(self, users, verbose=0, headless=False, wait=2):
         def read_credentials(file_path):
