@@ -74,6 +74,7 @@ def getCloudwordReport():
     return response
 @app.route('/scrape_following', methods=['POST'])
 def scrape_following_route():
+    print("start")
     data = request.json  # Get the JSON data from the request body
     
     if not data or 'users' not in data:
@@ -92,4 +93,4 @@ def generate_random_string(length):
     random_string = ''.join(random.choice(characters) for _ in range(length))
     return random_string
 if __name__ == '__main__':
-    app.run(app.run(host='0.0.0.0', port=5000))
+    app.run(app.run(host='0.0.0.0', port=5000 ))

@@ -129,14 +129,17 @@ def init_driver(headless=True, proxy=None, show_images=False, option=None, firef
         driver_path = geckodriver_autoinstaller.install()
     else:
         options = ChromeOptions()
-        driver_path = chromedriver_autoinstaller.install()
-
+        # driver_path = chromedriver_autoinstaller.install()
+        driver_path = '/usr/local/bin/chromedriver'
     if headless is True:
         print("Scraping on headless mode.")
         options.add_argument('--disable-gpu')
         options.headless = True
     else:
         options.headless = False
+    # options.headless = False
+    # user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36' 
+    options.add_argument('user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36')
     options.add_argument('log-level=3')
     if proxy is not None:
         options.add_argument('--proxy-server=%s' % proxy)
@@ -243,7 +246,7 @@ def read_credentials(file_path):
 # Example usage
 
 
-def log_in(driver, username, password, timeout=20, wait=4):
+def log_in(driver, username, password, email, timeout=20, wait=4):
     # email = get_email(env)  # const.EMAIL
     # password = get_password(env)  # const.PASSWORD
     # username = get_username(env)  # const.USERNAME
@@ -264,6 +267,18 @@ def log_in(driver, username, password, timeout=20, wait=4):
     # Find the 'Log in' button using its XPATH and click it to log in
     log_in = driver.find_element(By.XPATH,"//span[contains(text(),'Log in')]")
     log_in.click()
+    sleep(3)
+    # Check if email_element exists before interacting with it
+    try:
+        email_element = driver.find_element(By.XPATH,"//input[@name='text']")
+        email_element.send_keys(email)
+        
+        # Find the 'Next' button using its XPATH and click it to move to the password field
+        next_button = driver.find_element(By.XPATH,"//span[contains(text(),'Next')]")
+        next_button.click()
+    except NoSuchElementException:
+        pass
+
     sleep(random.uniform(wait, wait + 1))
 
     # driver.get('https://twitter.com/i/flow/login')
@@ -347,7 +362,7 @@ def keep_scroling(driver, data, writer, tweet_ids, scrolling, tweet_parsed, limi
     return driver, data, writer, tweet_ids, scrolling, tweet_parsed, scroll, last_position
 
 
-def get_users_follow(users, username, password, headless, follow=None, verbose=1, wait=2):
+def get_users_follow(users, username, password, email, headless, follow=None, verbose=1, wait=2):
     """ get the following or followers of a list of users """
 
     # initiate the driver
@@ -355,7 +370,7 @@ def get_users_follow(users, username, password, headless, follow=None, verbose=1
     sleep(wait)
     # log in (the .env file should contain the username and password)
     # driver.get('https://www.twitter.com/login')
-    log_in(driver,username, password, wait=wait)
+    log_in(driver,username, password, email, wait=wait)
     sleep(wait)
     # followers and following dict of each user
     follows_users = {}

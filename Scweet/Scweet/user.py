@@ -108,8 +108,8 @@ def get_users_followers(users, env, verbose=1, headless=True, wait=2, limit=floa
     return followers
 
 
-def get_users_following(users, username, password, verbose=1, headless=True, wait=2):
-    following = utils.get_users_follow(users, username, password, headless, "following", verbose, wait=wait)
+def get_users_following(users, username, password, email, verbose=1, headless=False, wait=2):
+    following = utils.get_users_follow(users, username, password, email, headless, "following", verbose, wait=wait)
 
     # if file_path == None:
     #     file_path = 'outputs/' + str(users[0]) + '_' + str(users[-1]) + '_' + 'following.json'
