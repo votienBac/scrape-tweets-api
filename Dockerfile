@@ -32,7 +32,11 @@ COPY requirements.txt .
 RUN pip install git+https://github.com/JustAnotherArchivist/snscrape.git
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
+# Install any required log handlers
+RUN pip install logstash
+ 
+# Set the log file path
+ENV LOG_FILE /app/logs/app.log
 # Copy the application code into the container
 COPY . .
 
