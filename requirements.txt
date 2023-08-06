@@ -1,5 +1,5 @@
 kafka-python==2.0.2
-flask==2.0.2
+flask[async]
 psycopg2
 apscheduler
 #snscrape
@@ -10,6 +10,4 @@ rake_nltk
 certifi
 selenium==4.2.0
 python-dotenv
-chromedriver-autoinstaller
-geckodriver-autoinstaller
 urllib3

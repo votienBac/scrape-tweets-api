@@ -69,7 +69,7 @@ for message in consumer:
 # Close the Kafka consumer
 consumer.close()
 
-stopword_file = "./stopwords.txt"
+stopword_file = "/app/stopwords.txt"
 stopword_list = []
 
 df['processed_text'] = df['content'].apply(pre_process)
