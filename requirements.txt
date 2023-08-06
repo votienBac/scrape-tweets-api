@@ -1,5 +1,7 @@
 kafka-python==2.0.2
 flask==2.0.2
+psycopg2
+apscheduler
 #snscrape
 pandas
 nltk

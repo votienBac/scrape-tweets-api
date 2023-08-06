@@ -10,7 +10,7 @@ class KafkaTwitterAnalyzer:
     def __init__(self, topic_name: str, consumer: str, number_tweets: int):
         self.consumer = KafkaConsumer(
             topic_name,
-            bootstrap_servers='34.125.143.12:9092',
+            bootstrap_servers='34.143.129.50:9092',
             auto_offset_reset='earliest',
             enable_auto_commit=True,
             group_id=consumer,
@@ -83,6 +83,7 @@ class KafkaTwitterAnalyzer:
         text = re.sub(r'#\w+', '', text)
         text = re.sub('\s+', ' ', text)
         text = text.lower()
+        # print(text)
         return text
 
     def keywords(self, sentence):
@@ -134,7 +135,8 @@ class KafkaTwitterAnalyzer:
         self.consumer.close()
         self.df['expanded_text'] = self.df['content'].apply(self.expand_contractions)
         self.df['processed_text'] = self.df['expanded_text'].apply(self.pre_process)
-        self.df['processed_text'] = self.df['expanded_text'].apply(self.remove_stopwords)
+        self.df['processed_text'] = self.df['processed_text'].apply(self.remove_stopwords)
+        print(self.df[self.df['processed_text'].str.contains('https', case=False)]['content'])
 
         common_words = self.get_top_n_bigram(self.df['processed_text'], size)
 

@@ -1,7 +1,9 @@
+import twscrape
+import asyncio
 from segment_keyword import extract_keywords
-import snscrape.modules.twitter as sntwitter
 from sentiment_detect import detect_sentiment
 import re
+
 class TwitterStreamer:
     # def __init__(self, bootstrap_servers, topic_name):
     #     self.bootstrap_servers = bootstrap_servers
@@ -9,8 +11,17 @@ class TwitterStreamer:
     #     self.producer = KafkaProducer(bootstrap_servers=self.bootstrap_servers,
     #                                   api_version=(0, 10, 1),
     #                                   value_serializer=lambda x: json.dumps(x).encode('utf-8'))
-
-    def stream_tweets(self, keyword, total_tweets, report_id):
+ 
+    async def stream_tweets(self, query, total_tweets, report_id):
+        async def worker(api: twscrape.API, q: str, limit: 20):
+            tweets = []
+            try:
+                async for doc in api.search(q, limit):
+                    tweets.append(doc)
+            except Exception as e:
+                print(e)
+            finally:
+                return tweets
         def textlink_to_dict(textlink):
             return textlink.url
         def pre_process(text):
@@ -31,11 +42,23 @@ class TwitterStreamer:
             text = text.lower()
             return text
         tweets_list = []
+        api = twscrape.API()
+        # add accounts here or before from cli (see README.md for examples)
+        await api.pool.add_account("BacManucians", "B@c08032001", "bacspm@gmail.com", "B@c08032001")
+        await api.pool.login_all()
 
-        for i, tweet in enumerate(sntwitter.TwitterSearchScraper(keyword, mode=sntwitter.TwitterSearchScraperMode.TOP).get_items()):
+        # queries = ["elon musk", "tesla", "spacex", "neuralink", "boring company"]
+        # list_list_tweets = await asyncio.gather(*(worker(api, q, total_tweets) for q in queries))
+        # tweets_list = []
+        # # print(tweets[0])
+        # for j, tweets in enumerate(list_list_tweets):
+        #     if j >= len(list_list_tweets):
+        #         break
+            # for i, tweet in enumerate(sntwitter.TwitterSearchScraper(keyword, mode=sntwitter.TwitterSearchScraperMode.TOP).get_items()):
+        tweets = await worker(api, query, total_tweets)
+        for i, tweet in enumerate(tweets):
             if i > total_tweets:
                 break
-
             user = tweet.user
             user_dict = {
                 'id': str(user.id),
@@ -70,12 +93,15 @@ class TwitterStreamer:
             
             url = []
             if tweet.media:
-                for media in tweet.media:
-                    if "Photo" in str(media):
-                        url.append(media.fullUrl)
-                    elif "Video" in str(media):
-                        for variant in media.variants:
-                            url.append(variant.url)
+                photos = tweet.media.photos
+                for variant in photos:
+                    url.append(variant.url)
+                videos = tweet.media.videos
+                for variant in videos:
+                    url.append(variant.thumbnailUrl)
+                animated = tweet.media.animated
+                for variant in animated:
+                    url.append(variant.thumbnailUrl)
 
             link_dicts = []
             if tweet.links:
@@ -105,7 +131,7 @@ class TwitterStreamer:
                 'likes': tweet.likeCount,
                 'replies': tweet.replyCount,
                 'views': tweet.viewCount,
-                'bookmarks': tweet.bookmarkCount,
+                'bookmarks': 0,
                 'url': tweet.url,
                 'language': tweet.lang,
                 'in_reply_to_tweet_id': tweet.inReplyToTweetId,
